@@ -26,6 +26,8 @@
 
 package org.hisp.dhis.android.dashboard.api.controllers;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.raizlabs.android.dbflow.sql.language.Delete;
 import com.squareup.okhttp.HttpUrl;
 
@@ -49,12 +51,14 @@ import org.hisp.dhis.android.dashboard.api.persistence.preferences.LastUpdatedMa
 import java.util.HashMap;
 import java.util.Map;
 
+import retrofit.client.Response;
+
 /**
  * @author Araz Abishov <araz.abishov.gsoc@gmail.com>.
  */
 final class UserController {
     private final DhisApi mDhisApi;
-
+    public String TAG="JSONTAG";
     public UserController(DhisApi dhisApi) {
         mDhisApi = dhisApi;
     }
@@ -112,4 +116,36 @@ final class UserController {
         userAccount.save();
         return userAccount;
     }
+    public Response updateProfileDetails(UserAccount userAccount
+            , Credentials credentials) throws APIException {
+        final JsonNodeFactory profileDetailsNodeFactory = JsonNodeFactory.instance;
+        ObjectNode profileDetailsNode = profileDetailsNodeFactory.objectNode();
+        profileDetailsNode.put("username", credentials.getUsername());
+        profileDetailsNode.put("firstName", userAccount.getFirstName());
+        profileDetailsNode.put("surname", userAccount.getSurname());
+        profileDetailsNode.put("email", userAccount.getEmail());
+        profileDetailsNode.put("introduction", userAccount.getIntroduction());
+        profileDetailsNode.put("jobTitle", userAccount.getJobTitle());
+        profileDetailsNode.put("gender", userAccount.getGender());
+        profileDetailsNode.put("birthday", userAccount.getBirthday());
+        profileDetailsNode.put("employer", userAccount.getEmployer());
+        profileDetailsNode.put("education", userAccount.getEducation());
+        profileDetailsNode.put("interests", userAccount.getInterests());
+        profileDetailsNode.put("languages", userAccount.getLanguages());
+        profileDetailsNode.put("phoneNumber", userAccount.getPhoneNumber());
+
+        //TODO get Settings using api
+        ObjectNode settingsNode = profileDetailsNodeFactory.objectNode();
+        settingsNode.put("keyDBLocale", "null");
+        settingsNode.put("keyMessageSmsNotification","true");
+        settingsNode.put("keyUiLocale","en");
+        settingsNode.put("keyAnalysisDisplayProperty","name");
+        settingsNode.put("keyMessageEmailNotification","true");
+        profileDetailsNode.set("settings", settingsNode);
+
+        Response response = mDhisApi.postUserAccount(profileDetailsNode);
+        if(response.getStatus()==200)
+            userAccount.save();
+        return mDhisApi.postUserAccount(profileDetailsNode);
+  }
 }

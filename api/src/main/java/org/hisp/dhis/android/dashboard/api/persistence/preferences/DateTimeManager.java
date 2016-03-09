@@ -51,7 +51,7 @@ public final class DateTimeManager {
      * Removes all key-value pairs.
      */
     public void delete() {
-        mPrefs.edit().clear().commit();
+        mPrefs.edit().clear().apply();
     }
 
     public void deleteLastUpdated(ResourceType type) {
@@ -63,7 +63,7 @@ public final class DateTimeManager {
     }
 
     private void putString(String key, String value) {
-        mPrefs.edit().putString(key, value).commit();
+        mPrefs.edit().putString(key, value).apply();
     }
 
     private String getString(String key) {
@@ -71,7 +71,7 @@ public final class DateTimeManager {
     }
 
     private void deleteString(String key) {
-        mPrefs.edit().remove(key).commit();
+        mPrefs.edit().remove(key).apply();
     }
 
 }

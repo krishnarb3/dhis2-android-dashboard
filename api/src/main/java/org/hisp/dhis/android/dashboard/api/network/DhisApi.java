@@ -28,6 +28,8 @@
 
 package org.hisp.dhis.android.dashboard.api.network;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.hisp.dhis.android.dashboard.api.models.Dashboard;
 import org.hisp.dhis.android.dashboard.api.models.DashboardItem;
 import org.hisp.dhis.android.dashboard.api.models.DashboardItemContent;
@@ -63,6 +65,8 @@ public interface DhisApi {
     @GET("/me/")
     UserAccount getCurrentUserAccount(@QueryMap Map<String, String> queryParams);
 
+    @POST("/me/user-account/")
+    Response postUserAccount(@Body JsonNode accountJSON);
 
     /////////////////////////////////////////////////////////////////////////
     // Methods for getting Dashboard and DashboardItems

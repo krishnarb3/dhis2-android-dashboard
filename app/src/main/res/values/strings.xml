@@ -106,5 +106,6 @@
     <string name="languages">Languages</string>
     <string name="email">Email</string>
     <string name="phone_number">Phone number</string>
+    <string name="title_activity_edit_user_profile">Edit User Profile</string>
     <!-- END Account -->
 </resources>

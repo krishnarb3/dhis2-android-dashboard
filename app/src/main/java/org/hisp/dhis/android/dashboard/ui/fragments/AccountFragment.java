@@ -27,8 +27,10 @@
 package org.hisp.dhis.android.dashboard.ui.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -43,6 +45,7 @@ import org.hisp.dhis.android.dashboard.R;
 import org.hisp.dhis.android.dashboard.api.models.UserAccount;
 import org.hisp.dhis.android.dashboard.api.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.dashboard.api.persistence.loaders.Query;
+import org.hisp.dhis.android.dashboard.ui.activities.EditUserProfileActivity;
 import org.hisp.dhis.android.dashboard.ui.adapters.AccountFieldAdapter;
 import org.hisp.dhis.android.dashboard.ui.models.Field;
 import org.hisp.dhis.android.dashboard.ui.views.GridDividerDecoration;
@@ -62,7 +65,8 @@ public final class AccountFragment extends BaseFragment implements LoaderCallbac
 
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
-
+    @Bind(R.id.fab)
+    FloatingActionButton floatingActionButton;
     @Bind(R.id.recycler_view)
     RecyclerView mRecyclerView;
 
@@ -97,6 +101,14 @@ public final class AccountFragment extends BaseFragment implements LoaderCallbac
         mRecyclerView.addItemDecoration(new GridDividerDecoration(getActivity()
                 .getApplicationContext()));
         mRecyclerView.setAdapter(mAdapter);
+
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(),EditUserProfileActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override

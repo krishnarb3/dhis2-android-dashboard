@@ -44,6 +44,8 @@ import org.hisp.dhis.android.dashboard.api.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.dashboard.api.utils.EventBusProvider;
 import org.hisp.dhis.android.dashboard.ui.events.UiEvent;
 
+import retrofit.client.Response;
+
 /**
  * @author Araz Abishov <araz.abishov.gsoc@gmail.com>.
  */
@@ -51,6 +53,7 @@ public final class DhisService extends Service {
     public static final int LOG_IN = 1;
     public static final int CONFIRM_USER = 2;
     public static final int LOG_OUT = 3;
+    public static final int EDIT_PROFILE = 4;
     public static final int SYNC_DASHBOARDS = 5;
     public static final int SYNC_DASHBOARD_CONTENT = 6;
     public static final int SYNC_INTERPRETATIONS = 7;
@@ -105,7 +108,16 @@ public final class DhisService extends Service {
             }
         });
     }
-
+    public void editProfileDetails(final HttpUrl serverUrl, final Credentials credentials
+        ,final UserAccount userAccount) {
+        JobExecutor.enqueueJob(new NetworkJob<Response>(EDIT_PROFILE,
+                ResourceType.USERS) {
+            @Override
+            public Response execute() throws APIException {
+                return mDhisController.setUserProfileDetails(serverUrl, credentials, userAccount);
+            }
+        });
+    }
     public void confirmUser(final Credentials credentials) {
         JobExecutor.enqueueJob(new NetworkJob<UserAccount>(CONFIRM_USER,
                 ResourceType.USERS) {

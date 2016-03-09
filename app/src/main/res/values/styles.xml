@@ -56,4 +56,8 @@
         <item name="android:background">@color/light_grey</item>
     </style>
 
+    <style name="Base.Theme.App.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="Base.Theme.App.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
 </resources>

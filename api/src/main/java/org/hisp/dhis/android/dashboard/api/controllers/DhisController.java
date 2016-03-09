@@ -42,6 +42,8 @@ import org.hisp.dhis.android.dashboard.api.network.RepoManager;
 import org.hisp.dhis.android.dashboard.api.persistence.preferences.DateTimeManager;
 import org.hisp.dhis.android.dashboard.api.persistence.preferences.LastUpdatedManager;
 
+import retrofit.client.Response;
+
 import static org.hisp.dhis.android.dashboard.api.utils.Preconditions.isNull;
 
 public class DhisController {
@@ -99,6 +101,13 @@ public class DhisController {
         return user;
     }
 
+    public Response setUserProfileDetails(HttpUrl serverUrl
+            , Credentials credentials, UserAccount userAccount) throws APIException {
+        DhisApi dhisApi = RepoManager
+                .createService(serverUrl, credentials);
+        return new UserController(dhisApi)
+                .updateProfileDetails(userAccount,credentials);
+    }
     public void invalidateSession() {
         LastUpdatedManager.getInstance().invalidate();
 
