@@ -66,7 +66,7 @@ public interface DhisApi {
     UserAccount getCurrentUserAccount(@QueryMap Map<String, String> queryParams);
 
     @POST("/me/user-account/")
-    Response postUserAccount(@Body JsonNode accountJSON);
+    Response postUserAccount(@Body UserAccount userAccount);
 
     /////////////////////////////////////////////////////////////////////////
     // Methods for getting Dashboard and DashboardItems

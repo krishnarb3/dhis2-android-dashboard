@@ -106,8 +106,9 @@ public class DhisController {
         DhisApi dhisApi = RepoManager
                 .createService(serverUrl, credentials);
         return new UserController(dhisApi)
-                .updateProfileDetails(userAccount,credentials);
+                .updateProfileDetails(userAccount);
     }
+
     public void invalidateSession() {
         LastUpdatedManager.getInstance().invalidate();
 
