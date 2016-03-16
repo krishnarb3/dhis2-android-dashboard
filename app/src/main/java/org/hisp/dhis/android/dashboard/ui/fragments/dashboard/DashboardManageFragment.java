@@ -30,6 +30,7 @@ package org.hisp.dhis.android.dashboard.ui.fragments.dashboard;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
@@ -54,6 +55,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
 
+import static org.hisp.dhis.android.dashboard.utils.TextUtils.isEmpty;
+
 /**
  * Handles editing (changing name) and removal of given dashboard.
  */
@@ -77,6 +80,9 @@ public final class DashboardManageFragment extends BaseDialogFragment {
 
     @Bind(R.id.delete_dashboard_button)
     Button mDeleteButton;
+
+    @Bind(R.id.text_input_dashboard_name)
+    TextInputLayout mTextInputLayout;
 
     Dashboard mDashboard;
 
@@ -131,16 +137,21 @@ public final class DashboardManageFragment extends BaseDialogFragment {
                 mDashboardName.setText(
                         mDashboard.getDisplayName());
                 mDashboardName.clearFocus();
-                break;
             }
             case R.id.accept_action: {
-                mDashboard.updateDashboard(
-                        mDashboardName.getText().toString());
-                mDashboardName.clearFocus();
+                boolean isEmptyName = isEmpty(mDashboardName.getText().toString().trim());
+                String message = isEmptyName ? getString(R.string.enter_valid_name) : "";
+                mTextInputLayout.setError(message);
 
-                if (isDhisServiceBound()) {
-                    getDhisService().syncDashboards();
-                    EventBusProvider.post(new UiEvent(UiEvent.UiEventType.SYNC_DASHBOARDS));
+                if (!isEmptyName) {
+                    mDashboard.updateDashboard(mDashboardName.getText().toString());
+                    mDashboardName.clearFocus();
+
+                    if (isDhisServiceBound()) {
+                        getDhisService().syncDashboards();
+                        EventBusProvider.post(new UiEvent(UiEvent.UiEventType.SYNC_DASHBOARDS));
+                    }
+                    dismiss();
                 }
                 break;
             }
@@ -155,6 +166,7 @@ public final class DashboardManageFragment extends BaseDialogFragment {
             case R.id.close_dialog_button: {
                 dismiss();
             }
+
         }
     }
 

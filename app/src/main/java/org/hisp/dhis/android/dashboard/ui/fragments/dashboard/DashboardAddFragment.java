@@ -30,6 +30,7 @@ package org.hisp.dhis.android.dashboard.ui.fragments.dashboard;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
@@ -48,6 +49,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static org.hisp.dhis.android.dashboard.utils.TextUtils.isEmpty;
+
 /**
  * Fragment responsible for creation of new dashboards.
  */
@@ -60,6 +63,9 @@ public final class DashboardAddFragment extends BaseDialogFragment {
     @Bind(R.id.dashboard_name)
     EditText mDashboardName;
 
+    @Bind(R.id.text_input_dashboard_name)
+    TextInputLayout mTextInputLayout;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +75,8 @@ public final class DashboardAddFragment extends BaseDialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_dashboard_add, container, false);
     }
 
@@ -83,17 +90,23 @@ public final class DashboardAddFragment extends BaseDialogFragment {
     @SuppressWarnings("unused")
     public void onButtonClicked(View view) {
         if (view.getId() == R.id.save_dashboard) {
-            Dashboard newDashboard = Dashboard
-                    .createDashboard(mDashboardName.getText().toString());
-            newDashboard.save();
+            boolean isEmptyName = isEmpty(mDashboardName.getText().toString().trim());
+            String message = isEmptyName ? getString(R.string.enter_valid_name) : "";
+            mTextInputLayout.setError(message);
 
-            if (isDhisServiceBound()) {
-                getDhisService().syncDashboards();
+            if (!isEmptyName) {
+                Dashboard newDashboard = Dashboard
+                        .createDashboard(mDashboardName.getText().toString());
+                newDashboard.save();
+                if (isDhisServiceBound()) {
+                    getDhisService().syncDashboards();
+                    EventBusProvider.post(new UiEvent(UiEvent.UiEventType.SYNC_DASHBOARDS));
+                }
+                dismiss();
             }
-
-            EventBusProvider.post(new UiEvent(UiEvent.UiEventType.SYNC_DASHBOARDS));
+        } else {
+            dismiss();
         }
-        dismiss();
     }
 
     public void show(FragmentManager manager) {
