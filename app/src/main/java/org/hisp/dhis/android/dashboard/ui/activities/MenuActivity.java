@@ -44,10 +44,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.squareup.otto.Subscribe;
+
 import org.hisp.dhis.android.dashboard.R;
 import org.hisp.dhis.android.dashboard.api.models.UserAccount;
 import org.hisp.dhis.android.dashboard.api.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.dashboard.api.persistence.loaders.Query;
+import org.hisp.dhis.android.dashboard.ui.events.UiEvent;
+import org.hisp.dhis.android.dashboard.ui.fragments.AccountEditFragment;
 import org.hisp.dhis.android.dashboard.ui.fragments.AccountFragment;
 import org.hisp.dhis.android.dashboard.ui.fragments.SettingsFragment;
 import org.hisp.dhis.android.dashboard.ui.fragments.dashboard.DashboardContainerFragment;
@@ -216,11 +220,31 @@ public class MenuActivity extends BaseActivity
         // stub implementation
     }
 
+    @Subscribe
+    @SuppressWarnings("unused")
+    public void onUiEventRecieved(UiEvent uiEvent) {
+        if(uiEvent.getEventType().equals(UiEvent.UiEventType.USER_ACCOUNT_EDIT)) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame,new AccountEditFragment())
+                    .addToBackStack(AccountEditFragment.getTAG())
+                    .commit();
+        }
+    }
+
     private static class UserAccountQuery implements Query<UserAccount> {
 
         @Override
         public UserAccount query(Context context) {
             return UserAccount.getCurrentUserAccountFromDb();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
         }
     }
 }

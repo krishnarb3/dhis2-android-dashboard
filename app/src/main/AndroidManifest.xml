@@ -39,9 +39,6 @@
         <activity
             android:name="org.hisp.dhis.android.dashboard.ui.activities.InterpretationCommentsActivity"
             android:label="@string/title_activity_interpretation_comments" />
-        <activity
-            android:name="org.hisp.dhis.android.dashboard.ui.activities.EditUserProfileActivity"
-            android:label="@string/title_activity_edit_user_profile" />
     </application>
 
 </manifest>

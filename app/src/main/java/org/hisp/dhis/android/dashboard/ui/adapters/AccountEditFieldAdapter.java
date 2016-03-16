@@ -83,9 +83,14 @@ public class AccountEditFieldAdapter extends AbsAdapter<Field, RecyclerView.View
                     if(!isValidEmail(field.getValue())) {
                         fieldEditTextViewHolder.valueEditText.setError("Invalid Email");
                     }
+                    else {
+                        fieldEditTextViewHolder.valueEditText.setError(null);
+                    }
                 }
-                else
+                else {
+                    fieldEditTextViewHolder.mEditTextListener.setEditText(null);
                     fieldEditTextViewHolder.valueEditText.setError(null);
+                }
                 break;
             case SPINNER:
                 field = getData().get(position);

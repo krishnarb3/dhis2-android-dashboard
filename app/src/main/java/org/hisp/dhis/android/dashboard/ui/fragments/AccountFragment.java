@@ -27,7 +27,6 @@
 package org.hisp.dhis.android.dashboard.ui.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -45,8 +44,9 @@ import org.hisp.dhis.android.dashboard.R;
 import org.hisp.dhis.android.dashboard.api.models.UserAccount;
 import org.hisp.dhis.android.dashboard.api.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.dashboard.api.persistence.loaders.Query;
-import org.hisp.dhis.android.dashboard.ui.activities.EditUserProfileActivity;
+import org.hisp.dhis.android.dashboard.api.utils.EventBusProvider;
 import org.hisp.dhis.android.dashboard.ui.adapters.AccountFieldAdapter;
+import org.hisp.dhis.android.dashboard.ui.events.UiEvent;
 import org.hisp.dhis.android.dashboard.ui.models.Field;
 import org.hisp.dhis.android.dashboard.ui.views.GridDividerDecoration;
 
@@ -105,8 +105,7 @@ public final class AccountFragment extends BaseFragment implements LoaderCallbac
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(),EditUserProfileActivity.class);
-                startActivity(intent);
+                EventBusProvider.post(new UiEvent(UiEvent.UiEventType.USER_ACCOUNT_EDIT));
             }
         });
     }

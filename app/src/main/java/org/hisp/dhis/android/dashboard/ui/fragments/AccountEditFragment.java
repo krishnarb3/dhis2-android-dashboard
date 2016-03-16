@@ -1,18 +1,20 @@
-package org.hisp.dhis.android.dashboard.ui.activities;
+package org.hisp.dhis.android.dashboard.ui.fragments;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import org.hisp.dhis.android.dashboard.DhisService;
@@ -33,111 +35,81 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class EditUserProfileActivity extends BaseActivity implements LoaderCallbacks<List<Field>> {
-
+public final class AccountEditFragment extends BaseFragment
+        implements LoaderManager.LoaderCallbacks<List<Field>> {
+    private static final String TAG = AccountEditFragment.class.getSimpleName();
     private static final int LOADER_ID = 66756123;
     private Session mSession;
 
-    @Bind(R.id.recycler_view_edit_profile)
+    @Bind(R.id.recycler_view)
     RecyclerView mRecyclerView;
     @Bind(R.id.toolbar)
-    Toolbar toolbar;
+    Toolbar mToolbar;
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
     AccountEditFieldAdapter mAdapter;
-    private LoaderManager.LoaderCallbacks<List<Field>> mCallbacks;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_account_edit, container, false);
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_user_profile);
-        ButterKnife.bind(this);
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        ButterKnife.bind(this, view);
 
-        setSupportActionBar(toolbar);
+        mToolbar.setNavigationIcon(R.mipmap.ic_menu);
+        mToolbar.setTitle(R.string.account);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleNavigationDrawer();
+            }
+        });
 
-        mAdapter = new AccountEditFieldAdapter(this,
-                getLayoutInflater());
+        mAdapter = new AccountEditFieldAdapter(getActivity(),
+                getLayoutInflater(savedInstanceState));
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
 
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.addItemDecoration(new GridDividerDecoration(this
+        mRecyclerView.addItemDecoration(new GridDividerDecoration(getActivity()
                 .getApplicationContext()));
         mRecyclerView.setAdapter(mAdapter);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(),"Updating...",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Updating...", Toast.LENGTH_SHORT).show();
                 if (isDhisServiceBound() && isNetworkAvailable() &&
                         !getDhisService().isJobRunning(DhisService.EDIT_PROFILE)) {
                     mSession = LastUpdatedManager.getInstance().get();
                     sendUserDetails();
-                    Toast.makeText(getApplicationContext()
+                    Toast.makeText(getActivity()
                             , "Successfully Updated", Toast.LENGTH_LONG).show();
                 }
                 else {
-                    Toast.makeText(getApplicationContext(),"Failure",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(),"Failure",Toast.LENGTH_LONG).show();
                 }
             }
         });
-
-        mCallbacks=this;
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        mCallbacks = this;
-        getSupportLoaderManager().initLoader(LOADER_ID,null,mCallbacks);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
     }
 
-    public void sendUserDetails() {
-        List<Field> fieldList = mAdapter.getData();
-        UserAccount userAccount = getUserAccountFromFields(fieldList);
-        getDhisService().editProfileDetails(
-                mSession.getServerUrl(), mSession.getCredentials(), userAccount);
-    }
-
-    public UserAccount getUserAccountFromFields(List<Field> fields) {
-        UserAccount userAccount = new UserAccount();
-        userAccount.setFirstName(fields.get(0).getValue());
-        userAccount.setSurname(fields.get(1).getValue());
-
-        String gender,genderFromField;
-        genderFromField = fields.get(2).getValue();
-        switch (genderFromField) {
-            case "Male":
-                gender = "gender_male";
-                break;
-            case "Female":
-                gender = "gender_female";
-                break;
-            default:
-                gender = "gender_other";
-                break;
-        }
-        userAccount.setGender(gender);
-
-        userAccount.setBirthday(fields.get(3).getValue());
-        userAccount.setIntroduction(fields.get(4).getValue());
-        userAccount.setEducation(fields.get(5).getValue());
-        userAccount.setEmployer(fields.get(6).getValue());
-        userAccount.setInterests(fields.get(7).getValue());
-        userAccount.setJobTitle(fields.get(8).getValue());
-        userAccount.setLanguages(fields.get(9).getValue());
-        userAccount.setEmail(fields.get(10).getValue());
-        userAccount.setPhoneNumber(fields.get(11).getValue());
-        return userAccount;
-    }
     @Override
     public Loader<List<Field>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id) {
             List<DbLoader.TrackedTable> trackedTables = new ArrayList<>();
             trackedTables.add(new DbLoader.TrackedTable(UserAccount.class));
-            return new DbLoader<>(this.getApplicationContext(),
+            return new DbLoader<>(getActivity().getApplicationContext(),
                     trackedTables, new UserAccountQuery());
         }
         return null;
@@ -199,9 +171,48 @@ public class EditUserProfileActivity extends BaseActivity implements LoaderCallb
         }
     }
 
+    public void sendUserDetails() {
+        List<Field> fieldList = mAdapter.getData();
+        UserAccount userAccount = getUserAccountFromFields(fieldList);
+        getDhisService().editProfileDetails(
+                mSession.getServerUrl(), mSession.getCredentials(), userAccount);
+    }
+
+    public UserAccount getUserAccountFromFields(List<Field> fields) {
+        UserAccount userAccount = new UserAccount();
+        userAccount.setFirstName(fields.get(0).getValue());
+        userAccount.setSurname(fields.get(1).getValue());
+
+        String gender,genderFromField;
+        genderFromField = fields.get(2).getValue();
+        switch (genderFromField) {
+            case "Male":
+                gender = "gender_male";
+                break;
+            case "Female":
+                gender = "gender_female";
+                break;
+            default:
+                gender = "gender_other";
+                break;
+        }
+        userAccount.setGender(gender);
+
+        userAccount.setBirthday(fields.get(3).getValue());
+        userAccount.setIntroduction(fields.get(4).getValue());
+        userAccount.setEducation(fields.get(5).getValue());
+        userAccount.setEmployer(fields.get(6).getValue());
+        userAccount.setInterests(fields.get(7).getValue());
+        userAccount.setJobTitle(fields.get(8).getValue());
+        userAccount.setLanguages(fields.get(9).getValue());
+        userAccount.setEmail(fields.get(10).getValue());
+        userAccount.setPhoneNumber(fields.get(11).getValue());
+        return userAccount;
+    }
+
     private boolean isNetworkAvailable() {
-        ConnectivityManager connMgr = (ConnectivityManager) this
-            .getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connMgr = (ConnectivityManager) getActivity()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             return true;
@@ -209,5 +220,9 @@ public class EditUserProfileActivity extends BaseActivity implements LoaderCallb
         else {
             return false;
         }
+    }
+
+    public static String getTAG() {
+        return TAG;
     }
 }
