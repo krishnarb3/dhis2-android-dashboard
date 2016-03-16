@@ -56,7 +56,6 @@ import retrofit.client.Response;
  */
 final class UserController {
     private final DhisApi mDhisApi;
-    public String TAG="JSONTAG";
     public UserController(DhisApi dhisApi) {
         mDhisApi = dhisApi;
     }
